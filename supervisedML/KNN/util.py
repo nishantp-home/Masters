@@ -11,7 +11,7 @@ import pandas as pd
 
 def getData(limit=None):
     print("Reading in and transforming data...")
-    filePath = '../Masters-DataSciences/supervisedML/train.csv'
+    filePath = '../train.csv'
     df = pd.read_csv(filePath)
     data = df.values
     np.random.shuffle(data)
