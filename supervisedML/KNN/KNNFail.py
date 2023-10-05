@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from myKNN import KNN
+from KNN import KNN
 
 def getData():
     width = 8

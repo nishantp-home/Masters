@@ -1,9 +1,9 @@
-from myKNN import KNN
-from util import get_xor
+from KNN import KNN
+from util import getXOR
 import matplotlib.pyplot as plt
 
 if __name__ == '__main__':
-    X, y = get_xor()
+    X, y = getXOR()
     print("X = ", X)
     print("y = ", y)
 

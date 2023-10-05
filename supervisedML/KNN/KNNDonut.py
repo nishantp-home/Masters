@@ -1,9 +1,9 @@
-from myKNN import KNN
-from util import get_donut
+from KNN import KNN
+from util import getDonut
 import matplotlib.pyplot as plt
 
 if __name__ =='__main__':
-    X, y = get_donut()
+    X, y = getDonut()
     print("X=", X)
     print("y=", y)
 
