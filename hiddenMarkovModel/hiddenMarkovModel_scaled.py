@@ -30,52 +30,54 @@ class HMM:
                 print("it:", it)
             alphas = []
             betas = []
-            P = np.zeros(sequenceCount)   # Probabilities
+            scales = []
+            logP = np.zeros(sequenceCount)
             for n in range(sequenceCount):
                 x = X[n]   # nth observation
                 T = len(x)
+                scale = np.zeros(T)
                 alpha = np.zeros((T, self.hiddenStateCount))
                 alpha[0] = self.pi * self.B[:, x[0]]    # First value of alpha
+                scale[0] = alpha[0].sum()
+                alpha[0] /= scale[0]
                 for t in range(1, T):
-                    tmp1 = alpha[t-1].dot(self.A) * self.B[:, x[t]]   # Element by element multiplication with B
-                    alpha[t] = tmp1
-                P[n] = alpha[-1].sum()     # Sum of all the last alphas
+                    alpha_t_prime = alpha[t-1].dot(self.A) * self.B[:, x[t]]   # Element by element multiplication with B
+                    scale[t] = alpha_t_prime.sum()
+                    alpha[t] = alpha_t_prime / scale[t]
+                logP[n] = np.log(scale).sum()
                 alphas.append(alpha)
+                scales.append(scale)
+
 
                 beta = np.zeros((T, self.hiddenStateCount))
                 beta[-1] = 1
                 for t in range(T-2, -1, -1):
-                    beta[t] = self.A.dot(self.B[:, x[t+1]] * beta[t+1])  # Element by element multiplication with B
+                    beta[t] = self.A.dot(self.B[:, x[t+1]] * beta[t+1]) / scale[t+1]  # Element by element multiplication with B
                 betas.append(beta)
 
-            assert(np.all(P > 0))
-            cost = np.sum(np.log(P))     # Total log likelihood
+            cost = np.sum(logP)    
             costs.append(cost)
 
-            self.pi = np.sum((alphas[n][0] * betas[n][0]) / P[n] for n in range(sequenceCount)) / sequenceCount
+            self.pi = np.sum((alphas[n][0] * betas[n][0]) for n in range(sequenceCount)) / sequenceCount
 
             denominator1 = np.zeros((self.hiddenStateCount, 1))
             denominator2 = np.zeros((self.hiddenStateCount, 1))
-            a_num = 0
-            b_num = 0
+            a_num = np.zeros((self.hiddenStateCount, self.hiddenStateCount))
+            b_num = np.zeros((self.hiddenStateCount, vocabularySize))
             for n in range(sequenceCount):
                 x = X[n]
                 T = len(x)
-                denominator1 += (alphas[n][:-1] * betas[n][:-1]).sum(axis=0, keepdims=True).T / P[n]
-                denominator2 += (alphas[n] * betas[n]).sum(axis=0, keepdims=True).T / P[n]
+                denominator1 += (alphas[n][:-1] * betas[n][:-1]).sum(axis=0, keepdims=True).T 
+                denominator2 += (alphas[n] * betas[n]).sum(axis=0, keepdims=True).T 
 
-                a_num_n = np.zeros((self.hiddenStateCount, self.hiddenStateCount))
                 for i in range(self.hiddenStateCount):
                     for j in range(self.hiddenStateCount):
                         for t in range(T-1):
-                            a_num_n[i, j] += alphas[n][t, i] * self.A[i, j] * self.B[j, x[t+1]] * betas[n][t+1, j]
-                a_num += a_num_n / P[n]
+                            a_num[i,j] += alphas[n][t, i] * betas[n][t+1, j] * self.A[i, j] * self.B[j, x[t+1]] / scales[n][t+1]
 
-                b_num_n = np.zeros((self.hiddenStateCount, vocabularySize))
                 for i in range(self.hiddenStateCount):
                     for t in range(T):
-                        b_num_n[i, x[t]] += alphas[n][t, i] * betas[n][t, i]
-                b_num += b_num_n / P[n]
+                        b_num[i, x[t]] += alphas[n][t, i] * betas[n][t, i]
 
             self.A = a_num / denominator1
             self.B = b_num / denominator2
@@ -87,29 +89,36 @@ class HMM:
         plt.plot(costs)
         plt.show()
 
-    def likelihood(self, x):
+    def logLikelihood(self, x):
+        # returns log P(x | model)
+        # using the forward part of the forward-backward algorithm
         T = len(x)
+        scale = np.zeros(T)
         alpha = np.zeros((T, self.hiddenStateCount))
         alpha[0] = self.pi * self.B[:, x[0]]
-        for t in range(1, T):
-            alpha[t] = alpha[t-1].dot(self.A) * self.B[:, x[t]]
-        return alpha[-1].sum()
-    
-    def likelihood_multi(self, X):
-        return np.array([self.likelihood(x) for x in X])
+        scale[0] = alpha[0].sum()
+        alpha[0] /= scale[0]
+        for t in range(1,T):
+            alpha_t_prime = alpha[t-1].dot(self.A) * self.B[:, x[t]]
+            scale[t] = alpha_t_prime.sum()
+            alpha[t] = alpha_t_prime / scale[t]
+        return np.log(scale).sum()
+
     
     def log_likelihood_multi(self, X):
-        return np.log(self.likelihood_multi(X))
+        return np.array([self.logLikelihood(x) for x in X])
     
     def get_state_sequence(self, x):
+        # returns the most likely state sequence given observed sequence x
+        # using the Viterbi algorithm
         T = len(x)
         delta = np.zeros((T, self.hiddenStateCount))
         psi = np.zeros((T, self.hiddenStateCount))
         delta[0] = self.pi * self.B[:, x[0]]
         for t in range(1, T):
             for j in range(self.hiddenStateCount):
-                delta[t, j] = np.max(delta[t-1]*self.A[:, j]) * self.B[j, x[t]]
-                psi[t, j] = np.argmax(delta[t-1]*self.A[:,j])
+                delta[t, j] = np.max(delta[t-1] + np.log(self.A[:, j])) + np.log(self.B[j, x[t]]) 
+                psi[t, j] = np.argmax(delta[t-1] + np.log(self.A[:,j]))
 
         #backtrack
         states = np.zeros(T, dtype=np.int32)
