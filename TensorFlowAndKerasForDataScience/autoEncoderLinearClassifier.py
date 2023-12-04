@@ -4,6 +4,7 @@
 import numpy as np
 import pandas as pd
 import tensorflow as tf
+from autoEncoderLinearClassifier import next_batch
 
 # Import data in a pandas dataframe
 filePath = "E:\\Eskills-Academy-projects\\TensorFlow-and-Keras-Lecture-Data\\Data\\section5"
