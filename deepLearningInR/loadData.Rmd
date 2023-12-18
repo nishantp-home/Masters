@@ -1,26 +1,39 @@
 1) Loading data
+
 ```{r}
-filePath = "E:\\Eskills-Academy-projects\\deepLearning-R-data\\Course-Data\\section1"
-setwd(filePath)    # Pointing R to look for data in this directory
-# read in csv file
-resp1 <- read.csv(file = "Resp1.csv", header = TRUE)
+filePath = "E:\\Eskills-Academy-projects\\deepLearning-R-data\\Course-Data\\section1\\"
+# setwd(filePath)    # Pointing R to look for data in this directory
+```
+
+
+# Read from local txt file
+```{r}
+txtFile = paste(filePath,'Resp2.txt', sep="")
+resp2 = read.table(txtFile, header = TRUE,  sep = ',')
+head(resp2)
+```
+
+
+# Read from local csv file
+```{r}
+csvFile = paste(filePath, "Resp1.csv", sep="")
+resp1 <- read.csv(csvFile, header = TRUE)
 head(resp1)
 str(resp1)
 summary(resp1)
 
-resp2 = read.table('Resp2.txt', header = TRUE,  sep = ',')
-head(resp2)
-
-winer1 <- read.csv(file = "winequality-red.csv", header = TRUE, sep = ';')
+csvFile2 = paste(filePath, "winequality-red.csv", sep="")
+winer1 <- read.csv(csvFile2, header = TRUE, sep = ';')
 head(winer1)
 summary(winer1)
 ```
 
 
-##Read in excel data
+# Read from local excel file
 ```{r}
+xlsFile = paste(filePath, 'boston1.xls', sep="")
 library(readxl, help, pos = 2, lib.loc = NULL)
-dfb <- read_excel('boston1.xls')
+dfb <- read_excel(xlsFile)
 head(dfb)
 summaryDfb = summary(dfb)
 ```
@@ -32,6 +45,7 @@ library(RCurl, help, pos = 2, lib.loc = NULL)
 dataURL = getURL("https://raw.githubusercontent.com/sciruela/Happiness-Salaries/master/data.csv")
 
 data1  <- read.csv(text=dataURL)
+head(data1)
 ```
 
 
