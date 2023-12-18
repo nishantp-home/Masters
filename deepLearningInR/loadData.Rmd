@@ -1,0 +1,50 @@
+1) Loading data
+```{r}
+filePath = "E:\\Eskills-Academy-projects\\deepLearning-R-data\\Course-Data\\section1"
+setwd(filePath)    # Pointing R to look for data in this directory
+# read in csv file
+resp1 <- read.csv(file = "Resp1.csv", header = TRUE)
+head(resp1)
+str(resp1)
+summary(resp1)
+
+resp2 = read.table('Resp2.txt', header = TRUE,  sep = ',')
+head(resp2)
+
+winer1 <- read.csv(file = "winequality-red.csv", header = TRUE, sep = ';')
+head(winer1)
+summary(winer1)
+```
+
+
+##Read in excel data
+```{r}
+library(readxl, help, pos = 2, lib.loc = NULL)
+dfb <- read_excel('boston1.xls')
+head(dfb)
+summaryDfb = summary(dfb)
+```
+
+
+# Using RCurl to read in csv data hosted online on github and other sites
+```{r}
+library(RCurl, help, pos = 2, lib.loc = NULL)
+dataURL = getURL("https://raw.githubusercontent.com/sciruela/Happiness-Salaries/master/data.csv")
+
+data1  <- read.csv(text=dataURL)
+```
+
+
+# Read table from a webpage
+```{r}
+library(XML)
+tableURL = "https://en.wikipedia.org/wiki/2016_Summer_Olympics_medal_table"
+
+UrlData = getURL(tableURL)
+data = readHTMLTable(UrlData, stringAsFactors=FALSE)
+# names(data)
+# head(data)
+
+x = data$`2016 Summer Olympics medal table`
+head(x)
+```
