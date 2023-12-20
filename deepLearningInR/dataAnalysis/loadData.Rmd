@@ -1,4 +1,4 @@
-1) Loading data
+# Loading data from various local and online sources
 
 ```{r}
 filePath = "E:\\Eskills-Academy-projects\\deepLearning-R-data\\Course-Data\\section1\\"
@@ -46,6 +46,10 @@ dataURL = getURL("https://raw.githubusercontent.com/sciruela/Happiness-Salaries/
 
 data1  <- read.csv(text=dataURL)
 head(data1)
+
+dataURL2 = getURL("https://raw.githubusercontent.com/opetchey/RREEBES/master/Beninca_etal_2008_Nature/data/nutrients_original.csv")
+data2 <- read.csv(text=dataURL2, header=T, skip=7)
+head(data2)
 ```
 
 
@@ -61,4 +65,26 @@ data = readHTMLTable(UrlData, stringAsFactors=FALSE)
 
 x = data$`2016 Summer Olympics medal table`
 head(x)
+```
+
+
+# Read in data from wikipedia HTML tables 
+```{r}
+library(rvest)
+tableURL = "https://en.wikipedia.org/wiki/2016_Summer_Olympics_medal_table"
+
+# Note: xpath should be in single quotes
+# Go to the html of the page with table, and check the table tag. 
+# Right click to copy the xpath
+xpath = '//*[@id="mw-content-text"]/div[1]/table[3]'
+medalTally <- tableURL %>% read_html() %>% html_nodes(xpath=xpath)  %>% html_table(fill=TRUE)
+medalTally <- medalTally[[1]] # first entry is table in the xpath
+head(medalTally)
+```
+```{r}
+tableURL2 = "https://en.wikipedia.org/wiki/List_of_World_Heritage_Sites_in_the_United_Kingdom"
+xpath = '//*[@id="mw-content-text"]/div[1]/table[3]'
+worldHeritageSitesUK <- tableURL2 %>% read_html() %>% html_nodes(xpath=xpath)  %>% html_table(fill=TRUE)
+worldHeritageSitesUK <- worldHeritageSitesUK[[1]]  # first entry is table in the xpath
+head(worldHeritageSitesUK)
 ```

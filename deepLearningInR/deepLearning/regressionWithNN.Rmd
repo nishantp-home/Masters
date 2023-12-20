@@ -1,0 +1,52 @@
+# Regression with Neurel network (nnet)
+
+# Load relevant packages
+```{r}
+library(car)
+library(caret)
+```
+
+# Load inbuilt data
+```{r}
+data("Prestige")
+```
+```{r}
+head(Prestige)
+nrow(Prestige)
+ncol(Prestige)
+```
+# Preprocess data
+```{r}
+train_index <- createDataPartition(Prestige$income, p = 0.75, list = FALSE)
+training <- Prestige[train_index, ]
+testing <- Prestige[-train_index, ]
+```
+```{r}
+nrow(training)
+nrow(testing)
+```
+# Goal: Predict income as a function of other variables
+# Response: income
+# Predictors: prestige, education
+```{r}
+my_grid <- expand.grid(.decay = c(0.5, 0.1), .size = c(5, 6, 7))
+prestige_fit <- train(income ~ prestige + education,
+  data = training, method = "nnet", maxit = 1000,
+  tuneGrid = my_grid
+)
+```
+```{r}
+varImp(prestige_fit)
+```
+```{r}
+plot(varImp(prestige_fit))
+```
+```{r}
+prestige_predict <- predict(prestige_fit, testing)
+```
+
+```{r}
+prestige_rmse <- sqrt(mean((prestige_predict - testing$income)^2))
+prestige_rmse
+```
+

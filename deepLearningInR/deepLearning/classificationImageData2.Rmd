@@ -1,0 +1,107 @@
+# Classification of fashion MNIST data
+# An MNIST-like dataset of 70,000 28x28 labeled fashion images
+# Labels: 0 T-shirt/top, 1 Trouser, 2 Pullover, 3 Dress, 4 Coat, 5 Sandal, 6 Shirt, 7 Sneaker, 8 Bag, 9 Ankle boot
+# Each row is a separate image. Column 1 is the class label. Remaining columns are pixel numbers (784 total).
+# Each value is the darkness of the pixel (1 to 255)
+
+# Load required libraries
+```{r}
+require(deepnet)
+library(nnet)
+```
+# Specify global file path, where data set is located
+```{r}
+file_path <- "E:\\Eskills-Academy-projects\\fashion-mnist\\"
+train_file_name <- "fashion-mnist_train.csv"
+train_file <- paste(file_path, train_file_name, sep = "")
+test_file_name <- "fashion-mnist_test.csv"
+test_file <- paste(file_path, test_file_name, sep = "")
+```
+# Load data
+```{r}
+f_data <- read.csv(train_file)
+```
+```{r}
+head(f_data)
+```
+```{r}
+str(f_data)
+ncol(f_data)
+nrow(f_data)
+```
+# Convert labels from int to factor for Classification
+```{r}
+f_data$label <- as.factor(f_data$label)
+str(f_data)
+levels(f_data$label)
+```
+# Visualize some items
+```{r}
+sample_4 <- matrix(as.numeric(f_data[4, -1]), nrow = 28, byrow = TRUE)
+image(sample_4,
+  col = grey.colors(255),
+  xaxt = "n", yaxt = "n",
+  main = paste("Target:", f_data[4, 1], sep = "")
+)
+```
+
+```{r}
+sample_1 <- matrix(as.numeric(f_data[1, -1]), nrow = 28, byrow = TRUE)
+image(sample_1,
+  col = grey.colors(255),
+  xaxt = "n", yaxt = "n",
+  main = paste("Target:", f_data[1, 1], sep = "")
+)
+```
+```{r}
+class(f_data$label)
+summary(f_data$label)
+```
+
+# Training with caret
+```{r}
+library(caret)
+```
+# Training and testing data
+```{r}
+train_index <- createDataPartition(f_data$label, p = 0.75, list = FALSE)
+train <- f_data[train_index, ]
+test <- f_data[-train_index, ]
+```
+
+# Training data: Get Predictors and Response variables 
+```{r}
+label_column_index <- 1
+train_x <- train[, -label_column_index] # predictors
+train_y <- train[, label_column_index] # response
+```
+```{r}
+model <- caret::train(
+  x = train_x, y = train_y,
+  method = "nnet",
+  tuneGrid = expand.grid(
+    .size = c(5), # Hidden layer with 5 neurons
+    .decay = 0.1
+  ),
+  trControl = trainControl(method = "none"), # No cross validation method
+  MaxNWts = 10000,
+  maxit = 100
+)
+```
+# Predictions on unseen test data
+```{r}
+prediction_nn <- predict(model, test, type = "raw")
+```
+```{r}
+head(prediction_nn)
+```
+# Confusion matrix
+```{r}
+cm_nn <- table(test$label, prediction_nn)
+```
+```{r}
+cm_nn
+```
+```{r}
+confusionMatrix(test$label, prediction_nn)
+```

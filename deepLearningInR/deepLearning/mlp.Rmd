@@ -1,0 +1,87 @@
+# Multilayer Perceptrons (MLP)
+
+# Load package for Stuttgart Neural Network Simulator 
+```{r}
+require(RSNNS)
+```
+
+# Specify global file path, where data set is located
+```{r}
+file_path <- "E:\\Eskills-Academy-projects\\deepLearning-R-data\\Course-Data\\"
+file_name <- "glassClass.csv"
+glass_class_file <- paste(file_path, file_name, sep = "")
+```
+
+# Read in the data from the csv file into dataframe d
+```{r}
+d <- read.csv(file = glass_class_file)
+head(d)
+str(d)
+```
+
+# Change the column 'Type' of type int to type factor with 6 levels for classification
+```{r}
+d$Type <- as.factor(d$Type)
+head(d)
+str(d)
+```
+# Take a sample from data and store it in df
+```{r}
+df <- d[sample(1:nrow(d), length(1:nrow(d))), 1:ncol(d)]
+```
+
+# Assign predictors and response variables to respoective dataframes 
+```{r}
+df_values <- df[, 1:9] # Predictors
+df_targets <- decodeClassLabels(df[, 10]) # Response variable
+```
+# Split dataset into training and testing 
+```{r}
+df <- splitForTrainingAndTest(df_values, df_targets, ratio = 0.20)
+```
+# Normalize the data
+```{r}
+df <- normTrainingAndTestSet(df)
+```
+
+```{r}
+str(df)
+```
+# MLPs are fully connected feed-forward networks
+# Create the model variable
+```{r}
+model <- mlp(df$inputsTrain, df$targetsTrain,
+  size = 5,
+  learnFuncParams = c(0.1),
+  maxit = 50,
+  inputsTest = df$inputsTest,
+  targetsTest = df$targetsTest
+)
+```
+# Print summary of the model
+```{r}
+summary(model)
+```
+# Print weight matrix of the learned model
+```{r}
+weightMatrix(model)
+```
+# Plot the iterative training and test error
+```{r}
+plotIterativeError(model)
+```
+
+# Make predictions on the unseen test dataset
+```{r}
+predictions <- predict(model, df$inputsTest)
+```
+# Confusion matrix
+
+# For the data used in the training
+```{r}
+confusionMatrix(df$targetsTrain, fitted.values(model))
+```
+# for the data used in the test
+```{r}
+confusionMatrix(df$targetsTest, predictions)
+```

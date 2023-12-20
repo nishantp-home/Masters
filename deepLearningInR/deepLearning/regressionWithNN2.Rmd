@@ -1,0 +1,105 @@
+# Regression with Neurel network (nnet)
+
+# Load relevant packages
+```{r}
+library(caret)
+library(neuralnet)
+require(readxl)
+```
+# Specify global file path, where data set is located
+```{r}
+file_path <- "E:\\Eskills-Academy-projects\\deepLearning-R-data\\Course-Data\\"
+file_name <- "Concrete_Data.xls"
+concrete_data_file <- paste(file_path, file_name, sep = "")
+```
+```{r}
+concrete_data <- read_xls(concrete_data_file)
+head(concrete_data)
+names(concrete_data)
+```
+# Rename the columns to shorter/more readable ones
+```{r}
+colnames(concrete_data) <- c(
+  "cement", "slag", "ash", "water",
+  "superplastic", "coarseagg", "fineagg", "age", "strength"
+)
+head(concrete_data)
+```
+
+```{r}
+concrete_data <- as.data.frame(concrete_data)
+head(concrete_data)
+```
+# Normalize all variables in 0-1 
+```{r}
+normal <- function(x) {
+  return((x - min(x)) / (max(x) - min(x)))
+}
+```
+```{r}
+concrete_data_normalized <- as.data.frame(lapply(concrete_data, normal))
+head(concrete_data_normalized)
+```
+
+# Preprocessing data
+```{r}
+train_index <- createDataPartition(concrete_data$strength,
+  p = 0.75, list = FALSE
+)
+training <- concrete_data[train_index, ]
+testing <- concrete_data[-train_index, ]
+```
+
+# Create model variable 
+```{r}
+concrete_model <- neuralnet(
+  formula = strength ~ cement + slag +
+    ash + water + superplastic +
+    coarseagg + fineagg + age,
+  data = training, hidden = 5
+)
+```
+```{r}
+plot(concrete_model)
+```
+
+# Load library for better neural network visualization
+```{r}
+library(NeuralNetTools)
+```
+# plot
+# Neural interpretation diagram (NID)
+# The default settings are to plot as NID with positive weights b/w
+# layers as black lines and negative weights as grey lines.
+# Line thickness is proportional to relative magnitude of each weight.
+
+```{r}
+par(mar = numeric(4))
+plotnet(concrete_model)
+```
+
+# Relative predictor importance
+
+## Garson's algorithm
+## Evaluates relative variable importance.
+## This function identifies the relative importance of Predictors
+## for a single response variable by deconstructing the model weights.
+
+## Importance of each variable can be determined by identifying all
+## weighted connections b/w layers in the network.
+## That is, all weights connecting the specific input node that pass 
+## through  the hidden layer to the response variable are identified.
+## This is repeated for all other explanatory variables until a list
+## of all weights that are specific to each input variable is obtained.
+```{r}
+garson(concrete_model)
+```
+
+# Olden
+## Calculates importance as the product of the raw input-hidden
+## and hidden-output connection weights b/w each input and output neuron 
+## and sums the product accross all hidden neurons.
+## Also identifies if a variable has a positive or negative effect.
+```{r}
+olden(concrete_model)
+```

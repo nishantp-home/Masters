@@ -1,0 +1,59 @@
+
+# Library containing inbuilt datasets
+```{r}
+library(MASS)
+data() # Inbuilt data set from MASS package of R
+```
+
+# Dealing with NAs and missing data 
+```{r}
+# Randomly distributed NAs
+data(airquality)
+str(airquality)
+head(airquality)
+??airquality # More information about this dataset
+summary(airquality)
+```
+# Two ways to remove NAs containg rows from the dataset
+```{r}
+cleaned_aq_data <- na.omit(airquality) # remove rows containing NAs
+cleaned_aq_data2 <- airquality[complete.cases(airquality), ] # Only retain non-NA rows
+```
+# Replace NAs with finite values
+```{r}
+# copy the airquality dataset to a new variable for modifiying
+air_quality_data <- airquality
+air_quality_data[is.na(air_quality_data)] <- 0 # replace with 0s
+
+mean_ozone <- as.integer(mean(airquality$Ozone, na.rm = TRUE))
+# Remove NAs while computeing mean of Ozone
+# With NA, mean value will be NA
+
+air_quality_data_fix <- ifelse(is.na(airquality$Ozone), mean_ozone, airquality$Ozone)
+```
+
+
+# Visualize the patterns of NAs
+```{r}
+library(mice)
+aqty2 <- airquality
+
+# md.pattern(aqty2)
+```
+```{r}
+library(VIM)
+mp <- aggr(aqty2, col = c("navyblue", "yellow"), numbers = TRUE, sortvars = TRUE, labels = names(aqty2), cex.acis = .7, gao = 3, ylab = c("Missing data", "Pattern"))
+```
+
+# Impute 
+# 50 iterations of predictive mean mapping for imputing
+# 5 datasets
+```{r}
+im_aqty <- mice(aqty2, m = 5, maxit = 50, method = "pmm", seed = 500)
+summary(im_aqty)
+```
+
+```{r}
+completed_data <- complete(im_aqty, 1)
+head(completed_data)
+```

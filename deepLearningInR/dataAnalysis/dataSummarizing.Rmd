@@ -1,0 +1,83 @@
+# Library containing inbuilt datasets
+```{r}
+library(datasets)
+library(dplyr)
+```
+# Data selection 
+# Select a few columns by names
+```{r}
+head(airquality)
+```
+```{r}
+selected_columns <- select(airquality, Ozone, Month)
+head(selected_columns)
+```
+# Drop a column
+```{r}
+dayd <- select(airquality, -Day)
+head(dayd)
+```
+
+# Data filtering
+```{r}
+f <- filter(airquality, Ozone > 25 & Temp > 75)
+head(f)
+```
+
+# Add new column
+```{r}
+dm <- mutate(airquality, TempInC = (Temp - 32) * 5 / 9)
+head(dm)
+```
+
+# Simmarize and group by data
+```{r}
+summarise(airquality, mean(Ozone, na.rm = TRUE)) # mean ozone values
+```
+
+## Group: average wind value per Month
+## Month is the basis of grouping
+```{r}
+summarise(group_by(airquality, Month), mean(Wind, na.rm = TRUE))
+```
+
+# Pipe operator "%>%": output of lhs is input of rhs
+```{r}
+airquality %>%
+  select(Ozone, Temp) %>%
+  head()
+```
+
+# Data summary
+```{r}
+airquality %>%
+  summarise(
+    avg = mean(Ozone, na.rm = TRUE),
+    min = min(Ozone, na.rm = TRUE),
+    max = max(Ozone, na.rm = TRUE),
+    total = n()
+  )
+```
+
+## Summarise by Month
+```{r}
+airquality %>%
+  group_by(Month) %>%
+  summarise(mean(Temp, na.rm = TRUE))
+```
+
+## Remove the 5th month and group
+
+```{r}
+airquality %>%
+  filter(Month != 5) %>%
+  group_by(Month) %>%
+  summarise(mean(Temp), na.rm = TRUE)
+```
+
+```{r}
+airquality %>%
+  select(Month, Ozone, Wind) %>%
+  filter(Wind > 12) %>%
+  head()
+```

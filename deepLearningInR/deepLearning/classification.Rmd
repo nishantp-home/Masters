@@ -1,0 +1,105 @@
+# Binary Classification using Neural Network (NNet)
+
+# Load package for classification and regression training (CARET)
+```{r}
+require(caret)
+```
+
+# Specify global file path, where data set is located
+```{r}
+file_path <- "E:\\Eskills-Academy-projects\\deepLearning-R-data\\Course-Data\\"
+file_name <- "UCI_Credit_Card.csv"
+credit_file <- paste(file_path, file_name, sep = "")
+```
+
+# Read in the data from the csv file into dataframe credit
+```{r}
+credit <- read.csv(file = credit_file)
+head(credit)
+```
+
+# Drop unrequired columns 
+```{r}
+drops <- c("ID")
+df <- credit[, !(names(credit) %in% drops)]
+head(df)
+```
+
+# Rename long column names in header to shorter ones
+```{r}
+names(df)[names(df) == "default.payment.next.month"] <- "default"
+str(df)
+```
+
+# 1 is default and 0 is not default, Recode
+```{r}
+df$default[df$default == 1] <- "Yes"
+df$default[df$default == 0] <- "No"
+str(df)
+```
+
+# Split data into training and testing datasets
+```{r}
+set.seed(99)
+# 75% data for training
+Train <- createDataPartition(df$default, p = 0.75, list = FALSE)
+```
+```{r}
+training <- df[Train, ] # 75% data for training
+testing <- df[-Train, ] # 25% data for testing
+nrow(training)
+nrow(testing)
+nrow(df)
+```
+
+# Implement cross-validation 
+```{r}
+fit_control <- trainControl(
+  method = "cv",
+  number = 10,
+  preProcOptions = list(thresh = 0.95),
+  classProbs = TRUE,
+  summaryFunction = twoClassSummary,
+  verboseIter = TRUE
+)
+```
+```{r}
+model_nnet <- train(default ~ ., training,
+  method = "nnet",
+  metric = "ROC",
+  preProcess = c("center", "scale"),
+  trace = FALSE,
+  tuneLength = 10,
+  trControl = fit_control
+)
+```
+```{r}
+model_nnet
+```
+```{r}
+summary(model_nnet)
+```
+```{r}
+plot((model_nnet))
+```
+
+```{r}
+pred_nnet <- predict(model_nnet, testing)
+# summary(pred_nnet)
+# summary(testing$default)
+```
+# confusionMatrix: How well my predicted values match with the labeled testing data
+```{r}
+cm_nnet <- caret::confusionMatrix(factor(pred_nnet), factor(testing$default))
+```
+```{r}
+cm_nnet
+```
+
+# Variable Importance: Indicates the most important variables in the descending order
+```{r}
+varImp(model_nnet)
+```
+```{r}
+plot(varImp(model_nnet))
+```

@@ -1,0 +1,105 @@
+# Classification of MNIST digits data
+# Each grey scale image is vector of size 784 (corresponding to an image matrix of 28*28 pixels of intensity values)
+# Lables (1-9, 10->0) are present in first column of the data, rest 2-785 columns are image vector components
+
+# Load required libraries
+```{r}
+require(deepnet)
+library(readr)
+library(nnet)
+```
+
+# Specify global file path, where data set is located
+```{r}
+file_path <- "E:\\Eskills-Academy-projects\\"
+train_file_name <- "train.csv"
+train_file <- paste(file_path, train_file_name, sep = "")
+test_file_name <- "test.csv"
+test_file <- paste(file_path, test_file_name, sep = "")
+```
+
+# Read in the data from the csv files into dataframes train and test
+```{r}
+train <- read_csv(train_file)
+test <- read_csv(test_file)
+```
+# Get row-counts of training and testing data
+```{r}
+train_count <- nrow(train)
+test_count <- nrow(test)
+```
+```{r}
+col_labels <- 1
+# removed first column, which is label
+input_x <- as.matrix(train[1:train_count, -col_labels])
+# labels in 1st column
+input_y <- as.matrix(train[1:train_count, col_labels])
+str(input_y)
+output_x <- as.matrix(test[1:test_count, ])
+```
+
+# Sample data representation
+```{r}
+rotate <- function(x) t(apply(x, 2, rev))
+marg <- 4
+par(mfrow = c(2, 3), mar = c(marg, marg, marg, marg))
+for (i in 1:6) {
+  image(
+    rotate(matrix(unlist(train[i, -1]),
+      nrow = 28, ncol = 28, byrow = TRUE
+    )),
+    col = grey.colors(10, rev = TRUE)
+  )
+}
+```
+
+# Explore data
+```{r}
+head(train)
+```
+# Convert labels to factors, and check levels
+```{r}
+train$label <- as.factor(train$label)
+levels(train$label)
+```
+
+```{r}
+library(caret)
+library(nnet)
+set.seed(1234)
+```
+# Create model variable
+```{r}
+model_nn <- nnet(label ~ .,
+  data = train,
+  size = 50,
+  maxit = 10,
+  MaxNWts = 100000,
+  decay = 1e-4
+)
+```
+
+# Make predictions on unseen test data
+```{r}
+prediction_nn <- predict(model_nn, test, type = "class")
+head(prediction_nn)
+```
+
+
+```{r}
+rotate <- function(x) t(apply(x, 2, rev))
+marg <- 1
+par(mfrow = c(2, 3), mar = c(marg, marg, marg, marg))
+for (i in 1:6) {
+  print(prediction_nn[i])
+  image(
+    rotate(matrix(unlist(test[i, ]),
+      nrow = 28, ncol = 28, byrow = TRUE
+    )),
+    col = grey.colors(10, rev = TRUE),
+    main = paste("prediction:", prediction_nn[i]),
+    xaxt = "n",
+    yaxt = "n"
+  )
+}
+```

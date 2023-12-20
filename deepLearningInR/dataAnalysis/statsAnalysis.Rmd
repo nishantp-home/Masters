@@ -1,0 +1,97 @@
+# Exploratory data analysis
+```{r}
+data(iris)
+names(iris)
+summary(iris)
+```
+# Examine data distribution of a quantitative variable
+```{r}
+hist(iris$Sepal.Length) # distribution of a variable
+```
+```{r}
+boxplot(iris$Sepal.Length, main = "Summary of iris", xlab = "Sepal Length")
+```
+```{r}
+# Relationship between 2 quantitative variables
+plot(iris$Sepal.Length, iris$Sepal.Wid)
+```
+# Plotting categorical or count variables
+```{r}
+data(mtcars)
+# names(mtcars)
+# str(mtcars)
+counts <- table((mtcars$gear))
+barplot(counts, main = "Cars", xlab = "Number of Gears", horiz = TRUE, col = "red")
+```
+
+
+# Improved data visualization
+```{r}
+library(ggplot2)
+```
+
+# Relation b/2 sepal length and width for 3 different species
+```{r}
+qplot(Sepal.Length, Petal.Length, data = iris, color = Species)
+```
+```{r}
+qplot(Sepal.Length, Petal.Length,
+  data = iris, color = Species, size = Petal.Width,
+  xlab = "Sepal Length", ylab = "Petal Length",
+  main = "Sepal vs Petal Length in Iris data"
+)
+```
+```{r}
+qplot(Sepal.Length, Petal.Length,
+  data = iris, color = Species,
+  xlab = "Sepal Length", ylab = "Petal Length",
+  main = "Sepal vs Petal Length in Iris data",
+  geom = "line"
+)
+```
+
+
+# Main ggplot functions for visualization
+# Format: ggplot(data =, aes(x=, y=, ...)) + geom_xxx()
+# aes -> we specify x, y
+# geom -> Plot type: e.g. histogram, boxplot
+```{r}
+ggplot(data = iris, aes(Sepal.Length, Sepal.Width)) +
+  geom_point()
+```
+# Distinguishing between species using color scheme, shapes, sizes
+# Using aes in ggplot or in geom_xxx
+```{r}
+ggplot(data = iris, aes(Sepal.Length, Sepal.Width, shape = Species)) +
+  geom_point(aes(color = (Species)))
+```
+# We can only specify color and shapes on factor variables
+# Factor: numbers representing categorical values
+# function "factor" turns any number into a qualitative representation
+```{r}
+str(mtcars)
+# Gear can be a categorical variable
+# Convert gear(integar) to category using factor functino
+```
+```{r}
+ggplot(mtcars, aes(x = mpg, y = wt, color = factor(gear))) +
+  geom_point()
+```
+# Histograms
+```{r}
+ggplot(iris, aes(x = Sepal.Length, fill = Species)) +
+  geom_histogram()
+```
+# boxplot
+```{r}
+ggplot(iris, aes(x = Species, y = Sepal.Length)) +
+  geom_boxplot()
+```
+# Visualize relationship b/w the different variables for 3 species
+```{r}
+ggplot(data = iris, aes(Sepal.Length, Sepal.Width)) +
+  geom_point() +
+  facet_grid(. ~ Species) +
+  geom_smooth(method = "lm")
+```
+

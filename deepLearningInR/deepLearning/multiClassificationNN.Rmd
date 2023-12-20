@@ -1,0 +1,104 @@
+# Multiclass classification using neural Network
+
+# Load package 
+```{r}
+require(nnet)
+```
+
+# Load inbuilt data
+```{r}
+data(iris)
+head(iris)
+summary(iris)
+str(iris)
+```
+
+# Fit model
+```{r}
+fit <- nnet(Species ~ .,
+  data = iris,
+  size = 4,
+  decay = 0.0001,
+  maxit = 500
+)
+```
+# Summarize the fit
+```{r}
+summary(fit)
+```
+# Make predictions
+```{r}
+predictions <- predict(fit, iris[, 1:4], type = "class")
+```
+
+# Summarize accuracy
+```{r}
+library(caret)
+# Convert the char type predictions to factor type predictions
+# for creating confusion matrix
+prediction_factor <- factor(predictions)
+caret::confusionMatrix(iris$Species, prediction_factor)
+```
+
+# Multiclass Classification on real data
+
+# Specify global file path, where data set is located
+```{r}
+file_path <- "E:\\Eskills-Academy-projects\\deepLearning-R-data\\Course-Data\\"
+file_name <- "loanPay.csv"
+loan_file <- paste(file_path, file_name, sep = "")
+```
+
+# Read in the data from the csv file into dataframe credit
+```{r}
+loan_data <- read.csv(file = loan_file)
+head(loan_data)
+summary(loan_data)
+```
+# Convert the response variable to factor type for classification
+```{r}
+loan_data$loan_status <- factor(loan_data$loan_status)
+summary(loan_data)
+```
+# Replace NA with 0
+```{r}
+loan_data[is.na(loan_data)] <- 0
+```
+# Load only the required features into a data frame
+```{r}
+name_list <- c(
+  "loan_status", "Principal",
+  "terms", "age", "education", "Gender", "past_due_days"
+)
+
+df <- loan_data[, colnames(loan_data) %in% name_list]
+head(df)
+summary(df)
+```
+# Convert other required features with discrete classes to factor varaibles
+```{r}
+df$education <- factor(df$education)
+df$Gender <- factor(df$Gender)
+summary(df)
+```
+
+# Fit the neural network model
+```{r}
+fit <- nnet(loan_status ~ .,
+  data = df,
+  size = 4,
+  decay = 0.001,
+  maxit = 500
+)
+summary(fit)
+```
+# Make predictions
+```{r}
+predictions <- predict(fit, df[, 2:7], type = "class")
+p <- as.data.frame(predictions)
+table(predictions, df$loan_status)
+```
+```{r}
+library(caret)
+caret::confusionMatrix(factor(predictions), df$loan_status)
+```

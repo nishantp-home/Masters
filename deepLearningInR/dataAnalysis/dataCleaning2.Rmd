@@ -1,0 +1,43 @@
+# More data cleaning methods
+
+```{r}
+file_path <- "E:\\Eskills-Academy-projects\\deepLearning-R-data\\Course-Data\\"
+file_name <- "countries_ecologicalF.csv"
+file <- paste(file_path, file_name, sep = "")
+```
+
+```{r}
+eco <- read.csv(file = file, header = TRUE)
+head(eco)
+str(eco)
+```
+```{r}
+# add a new column named GDP, with removed $ and ,
+# signs of the GDP.per.Capita column
+eco$GDP <- as.numeric(gsub("[\\$,]", "", eco$GDP.per.Capita))
+head(eco)
+names(eco)
+```
+```{r}
+mdf <- names(eco) %in% c("Population..millions.", "GDP", "Grazing.Footprint", "HDI", "Carbon.Footprint", "Cropland", "Forest.Land", "Urban.Land", "Total.Biocapacity")
+reduced_data <- eco[mdf] # include the above columns
+# reducedData2 = eco[!mdf]  # exclude the above columns
+head(reduced_data)
+# head(reducedData2)
+```
+```{r}
+# Rename column by name: change: "Population..millions." to "Population"
+# Similarly for other columns
+names(reduced_data)[names(reduced_data) == "Population..millions."] <- "Population"
+names(reduced_data)[names(reduced_data) == "Total.Biocapacity"] <- "BiocapacityT"
+```
+```{r}
+names(reduced_data)
+```
+
+# Store/ export data to a new csv file
+```{r}
+out_file_name <- "biocap.csv"
+out_file <- paste(file_path, out_file_name, sep = "")
+write.csv(reduced_data, file = out_file)
+```
