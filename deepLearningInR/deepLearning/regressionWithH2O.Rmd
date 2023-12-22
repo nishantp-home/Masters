@@ -1,0 +1,75 @@
+# Using H2O framework for Regression with DeepLearning
+```{r}
+library(tidyverse)
+library(ggplot2)
+library(mlbench)
+```
+
+# Load Data
+```{r}
+data(BostonHousing)
+head(BostonHousing)
+b <- BostonHousing
+```
+```{r}
+str(b)
+dim(b)
+# 1-13 are predictors
+# medv is a response varaible (continuous numerical variable)
+```
+
+# Load H2O library and initiate an h2o object with 2 threads 
+```{r}
+library(h2o)
+h2o.init()
+```
+# Convert data into h2o compatible hex file
+```{r}
+d_hex <- as.h2o(b, destination_frame = "d_hex")
+```
+```{r}
+head(d_hex)
+str(d_hex)
+summary(d_hex)
+dim(d_hex)
+```
+
+# Split data into training and testing datasets
+```{r}
+g_split <- h2o.splitFrame(data = d_hex, ratios = 0.75)
+train <- g_split[[1]]
+test <- g_split[[2]]
+```
+```{r}
+head(train)
+dim(train)
+```
+```{r}
+head(test)
+dim(test)
+```
+
+# Create a DNN model for Regression
+# Default: 2 layer DNN with 200 neurons each 
+```{r}
+model <- h2o.deeplearning(
+  x = 1:13,
+  y = "medv",
+  training_frame = train,
+  model_id = "model",
+  activation = "Tanh",
+  l2 = 0.00001
+)
+```
+
+# Make predictions on unseen test data
+```{r}
+predictions <- as.vector(h2o.predict(model, test))
+```
+# Compute mean squared error (MSE)
+```{r}
+mse <- mean(abs(predictions - as.vector(test$medv)))
+```
+```{r}
+mse
+```

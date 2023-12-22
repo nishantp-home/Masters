@@ -1,0 +1,92 @@
+# Simple Deep Neural Network (DNN) with package neuralnet
+# DNN has 2 or more hidden layers, while ANN has 1 hidden layer
+
+```{r}
+library(neuralnet)
+library(ISLR)
+```
+
+```{r}
+data <- College
+head(data)
+dim(data)
+names(data)
+str(data)
+```
+
+# Get vectors of column-wise maximum and minimum values
+```{r}
+max_data <- apply(data[, 2:18], 2, max) # maximum value
+min_data <- apply(data[, 2:18], 2, min) # minimum value
+max_data
+min_data
+```
+
+# Normalize data
+```{r}
+data_scaled <- scale(data[, 2:18],
+  center = min_data, scale = max_data - min_data
+)
+```
+
+# Recode the qualitative response variable to 0-1 
+```{r}
+private <- as.numeric(data$Private) - 1
+```
+
+# Combine data
+```{r}
+data_scaled <- cbind(private, data_scaled)
+```
+```{r}
+head(data_scaled)
+```
+
+# Split data into test and train datasets
+```{r}
+index <- sample(seq_len(nrow(data)), round(0.7 * nrow(data))) # 70% training
+train_data <- as.data.frame(data_scaled[index, ])
+test_data <- as.data.frame(data_scaled[-index, ])
+```
+```{r}
+# Get a list of all column names
+n <- names(train_data)
+# LHS of ~ is response, and RHS of ' is predictor'
+f <- as.formula(paste("private ~", paste(n[!n %in% "private"], collapse = "+")))
+f
+```
+# A Simple Deep Neural Network (DNN)
+```{r}
+deep_net <- neuralnet(f,
+  data = train_data, hidden = c(5, 3),
+  # 5 and 3 neurons in 1st and 2nd hidden layers
+  linear.output = FALSE
+)
+```
+```{r}
+plot(deep_net)
+```
+# Make predictions on unseen test data
+```{r}
+predicted_data <- compute(deep_net, test_data[, 2:18])
+print(head(predicted_data$net.result))
+```
+
+# Function to round off to 0 or 1
+```{r}
+predicted_data$net.result <- sapply(
+  predicted_data$net.result, round,
+  digits = 0
+)
+```
+```{r}
+table(test_data$private, predicted_data$net.result)
+```
+
+```{r}
+library(caret)
+confusionMatrix(
+  as.factor(test_data$private),
+  as.factor(predicted_data$net.result)
+)
+```

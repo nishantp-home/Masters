@@ -1,0 +1,67 @@
+# Specify global file path, where data set is located
+```{r}
+file_path <- "E:\\Eskills-Academy-projects\\deepLearning-R-data\\Course-Data\\"
+file_name <- "cancer_tumor.csv"
+tumor_file <- paste(file_path, file_name, sep = "")
+```
+```{r}
+tumor_data <- read.csv(tumor_file)
+```
+```{r}
+head(tumor_data)
+str(tumor_data)
+```
+
+```{r}
+library(h2o)
+h2o.init()
+```
+
+```{r}
+d_hex <- as.h2o(tumor_data, destination_frame = "d_hex")
+```
+```{r}
+head(d_hex)
+dim(d_hex)
+```
+
+
+# DNN with 3 hidden layers, for unsupervised Learning
+```{r}
+model_unsup <- h2o.deeplearning(
+  x = 2:31, # Only specified predictors
+  training_frame = d_hex,
+  autoencoder = TRUE, # Important argument
+  hidden = c(400, 200, 2, 200, 400),
+  epochs = 600,
+  activation = "Tanh"
+)
+```
+
+
+```{r}
+train_supervised_features <- h2o.deepfeatures(model_unsup, d_hex, layer = 3)
+```
+
+```{r}
+dim(train_supervised_features)
+```
+```{r}
+plotdata <- as.data.frame(train_supervised_features)
+plotdata$label <- as.character(as.vector(d_hex[, 1]))
+```
+```{r}
+names(plotdata)
+```
+```{r}
+library(ggplot2)
+```
+```{r}
+ggplot(plotdata, aes(
+  x = DF.L3.C1,
+  y = DF.L3.C2,
+  color = as.factor(label)
+)) +
+  geom_point(alpha = 0.3)
+```
+

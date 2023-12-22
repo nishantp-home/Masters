@@ -1,0 +1,82 @@
+# Specify global file path, where data set is located
+```{r}
+file_path <- "E:\\Eskills-Academy-projects\\deepLearning-R-data\\Course-Data\\"
+file_name <- "cancer_tumor.csv"
+tumor_file <- paste(file_path, file_name, sep = "")
+```
+```{r}
+tumor <- read.csv(tumor_file)
+```
+```{r}
+head(tumor)
+names(tumor)
+# dim(tumor)
+# str(tumor)
+```
+```{r}
+n <- "diagnosis.1.m..0.b."
+names(tumor)[names(tumor) == n] <- "diagnosis"
+names(tumor)
+```
+```{r}
+tumor$diagnosis <- as.factor(tumor$diagnosis)
+levels(tumor$diagnosis)
+```
+
+# Load H2O library and initiate an h2o object with 2 threads 
+```{r}
+library(h2o)
+h2o.init(
+  max_mem_size = "2G",
+  nthreads = 2,
+  ip = "localhost",
+  port = 54321
+)
+```
+
+# Convert data into h2o compatible hex file
+```{r}
+d_hex <- as.h2o(tumor, destination_frame = "d_hex")
+```
+
+```{r}
+head(d_hex)
+str(d_hex)
+```
+
+# Set variables, response: y and predictors: x
+```{r}
+y_label <- "diagnosis"
+x_labels <- setdiff(colnames(d_hex), y_label)
+```
+```{r}
+x_labels
+```
+
+# Train the model - without hidden layer
+```{r}
+model <- h2o.deeplearning(
+  x = x_labels,
+  y = y_label,
+  training_frame = d_hex,
+  standardize = TRUE,
+  model_id = "model",
+  activation = "Rectifier",
+  epochs = 100,
+  seed = 1,
+  nfolds = 5,
+  variable_importances = TRUE
+)
+```
+
+# Compute variable importance and performance
+```{r}
+varimp_plot <- h2o.varimp_plot(model, num_of_features = 20)
+performance <- h2o.performance(model, xval = TRUE)
+```
+```{r}
+varimp_plot
+```
+```{r}
+performance
+```

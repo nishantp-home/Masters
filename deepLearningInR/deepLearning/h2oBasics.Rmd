@@ -1,0 +1,42 @@
+# Basic commands to import and explore data using h2o cluster
+
+```{r}
+library(h2o)
+```
+
+# Start up a 1-node H2O server on your local machine
+```{r}
+h2o.init(nthreads = -1, max_mem_size = "2G") # upto 2GB
+
+# Clean slate - just in case was already running, they will be cleared
+h2o.removeAll()
+```
+
+# Specify global file path, where data set is located
+```{r}
+file_path <- "E:\\Eskills-Academy-projects\\deepLearning-R-data\\Course-Data\\"
+file_name <- "glassClass.csv"
+glass_class_file <- paste(file_path, file_name, sep = "")
+```
+```{r}
+glass <- h2o.importFile(glass_class_file)
+```
+```{r}
+head(glass)
+```
+```{r}
+summary(glass, exact_quantiles = TRUE)
+```
+```{r}
+h2o.table(glass$K)
+```
+
+# Split dataset
+```{r}
+g_split <- h2o.splitFrame(data = glass, ratios = 0.75)
+g_train <- g_split[[1]]
+g_test <- g_split[[2]]
+```
+```{r}
+head(g_train)
+```

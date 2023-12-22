@@ -1,0 +1,91 @@
+# Specify global file path, where data set is located
+```{r}
+file_path <- "E:\\Eskills-Academy-projects\\deepLearning-R-data\\Course-Data\\"
+file_name <- "creditcard.csv"
+creditcard_file <- paste(file_path, file_name, sep = "")
+```
+```{r}
+creditcard_data <- read.csv(creditcard_file)
+```
+```{r}
+head(creditcard_data)
+```
+
+```{r}
+library(h2o)
+h2o.init()
+```
+
+```{r}
+d_hex <- as.h2o(creditcard_data, destination_frame = "d_hex")
+```
+```{r}
+head(d_hex)
+dim(d_hex)
+```
+```{r}
+g_split <- h2o.splitFrame(data = d_hex, ratios = 0.75)
+train <- g_split[[1]]
+test <- g_split[[2]]
+```
+
+# DNN with 3 hidden layers, for unsupervised Learning
+```{r}
+model_unsup <- h2o.deeplearning(
+  x = 1:30, # Only specified predictors
+  training_frame = train,
+  model_id = "model_unsup",
+  autoencoder = TRUE, # Important argument
+  reproducible = TRUE,
+  ignore_const_cols = FALSE,
+  seed = 42,
+  hidden = c(10, 10, 10),
+  epochs = 100,
+  activation = "Tanh"
+)
+```
+
+```{r}
+predictions <- h2o.predict(model_unsup, test)
+head(predictions)
+dim(predictions)
+```
+# Anamolies in the training data (cases of fraud in this case)
+```{r}
+model_anon <- h2o.anomaly(model_unsup, d_hex, per_feature = TRUE)
+```
+
+```{r}
+anamoly <- h2o.anomaly(model_unsup, test) %>%
+  as.data.frame() %>%
+  tibble::rownames_to_column() %>%
+  mutate(Class = as.vector(test[, 31]))
+```
+
+```{r}
+anamoly$Class <- as.factor(anamoly$Class)
+```
+
+# Model error
+```{r}
+mean_mse <- anamoly %>%
+  group_by(Class) %>%
+  summarise(mean = mean(Reconstruction.MSE))
+```
+
+# Plot the classified patterns
+```{r}
+library(ggplot2)
+```
+```{r}
+ggplot(anamoly, aes(
+  x = as.numeric(rowname), y = Reconstruction.MSE, color = as.factor(Class)
+)) +
+  geom_point(alpha = 0.3) +
+  geom_hline(data = mean_mse, aes(yintercept = mean, color = Class)) +
+  scale_color_brewer(palette = "Set1") +
+  labs(
+    x = "Instance number",
+    color = "Class"
+  )
+```

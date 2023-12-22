@@ -1,0 +1,73 @@
+```{r}
+library(MASS)
+library(neuralnet)
+```
+```{r}
+set.seed(500)
+data <- Boston
+```
+
+# Split data into training (75%) and testing (25%) datasets 
+```{r}
+index <- sample(seq_len(nrow(data)), round(0.75 * nrow(data)))
+train_data <- data[index, ]
+test_data <- data[-index, ]
+```
+# Normalize data
+  # Get vectors of column-wise maximum and minimum values
+  # Scale the data
+
+```{r}
+maxs <- apply(data, 2, max)
+mins <- apply(data, 2, min)
+scaled <- as.data.frame(scale(data, center = mins, scale = maxs - mins))
+```
+
+```{r}
+train_data_scaled <- scaled[index, ]
+test_data_scaled <- scaled[-index, ]
+```
+# Create a DNN with 2 hidden layers with 5 and 3 neurons respectively
+  # create formula f as argument of neuralnet
+  ## as follows: response ~ predictors (separated by +)
+
+```{r}
+n <- names(train_data_scaled)
+f <- as.formula(paste("medv ~", paste(n[!n %in% "medv"], collapse = "+")))
+```
+```{r}
+nn <- neuralnet(f,
+  data = train_data_scaled,
+  hidden = c(5, 3),
+  linear.output = TRUE
+)
+```
+# Visualize neural network graphically
+```{r}
+plot(nn)
+```
+
+# Make predictions 
+```{r}
+predicted_nn <- compute(nn, test_data_scaled[, 1:13])
+```
+# Unscale predictions
+```{r}
+predicted_nn_unscaled <- predicted_nn$net.result *
+  (max(data$medv) - min(data$medv)) + min(data$medv)
+```
+#  Actual (unscaled) values of response variable of test data set
+```{r}
+test_response_unscaled <- test_data_scaled$medv *
+  (max(data$medv) - min(data$medv)) + min(data$medv)
+```
+```{r}
+test_response_unscaled
+```
+# Compute mean squared error (MSE) of the neural network
+```{r}
+mse_nn <- sum((test_response_unscaled - predicted_nn_unscaled)^2) /
+  nrow(test_data)
+
+mse_nn
+```
