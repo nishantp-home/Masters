@@ -17,7 +17,8 @@ summary(airquality)
 # Two ways to remove NAs containg rows from the dataset
 ```{r}
 cleaned_aq_data <- na.omit(airquality) # remove rows containing NAs
-cleaned_aq_data2 <- airquality[complete.cases(airquality), ] # Only retain non-NA rows
+cleaned_aq_data2 <- airquality[complete.cases(airquality), ] 
+# Only retain non-NA rows
 ```
 # Replace NAs with finite values
 ```{r}
