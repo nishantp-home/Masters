@@ -20,10 +20,8 @@ dfConcat3 = pd.concat([df1, df3], join='inner')   # only columns common for both
 
 # Read data from CSV file
 filePath = 'e:\\Eskills-Academy-projects\\StatisticsAndMLforRegressionData\\section3'
-
 foodFilePath = filePath + '\\starbucks-food2.csv'
 drinksFilePath = filePath + '\\starbucks-menu-nutrition-drinks.csv'
-
 food = pd.read_csv(foodFilePath)
 drinks = pd.read_csv(drinksFilePath)
 
@@ -31,7 +29,6 @@ drinks = pd.read_csv(drinksFilePath)
 food.columns = ['Items', 'Calories', 'Fat', 'Carb', 'Fiber', 'Protein']
 drinks.columns = ['Items', 'Calories', 'Fat', 'Carb', 'Fiber', 'Protein', 'Na']
 concat = pd.concat([drinks, food])
-
 
 # Merge data
 gfpFilePath = filePath + '\\GlobalFirePower.csv'

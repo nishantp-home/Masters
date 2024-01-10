@@ -27,7 +27,7 @@ print("x1 * x2 = ", tf.multiply(x1, x2))   # multiplication
 # Variables
 x = tf.constant(35, name='x')
 y = tf.Variable(x + 5, name='y')
-print(y.numpy())
+print(y.numpy()) # type: ignore
 
 
 # Placeholders in tensorflow

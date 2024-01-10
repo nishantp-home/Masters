@@ -1,6 +1,5 @@
 import pandas as pd
 
-
 # Data structures in Pandas:
     # 1. Series: Represents data in a 1D form
     # 2. Data frames: Represent data in a 2D tabular form
@@ -17,7 +16,7 @@ print("oneD pandas series:\n" + str(oneD))
 
 # loc is a label-location based indexer
 print(oneD.loc[['Cat', 'Emma']])   # Selection by labels-Cat and Emma
-print(oneD[[0, 3, 4]])  # Extract data at index 0, 3 and 4
+print(oneD[[0, 3, 4]])  # type: ignore # Extract data at index 0, 3 and 4
 
 # iloc is the integar-position based (from 0 to length-1 of the axis). access index 1
 print(oneD.iloc[1])
@@ -25,7 +24,6 @@ print(oneD.iloc[1])
 # Check if there is cat in the series index
 print(" 'cat' in series index ?:", 'cat' in oneD)
 print(" 'Cat' in series index ?:", 'Cat' in oneD)
-
 
 
 # DataFrames- 2D data structure. Stores data in tabular form (rows and columns)
@@ -46,14 +44,17 @@ print(pd.DataFrame(df, index=['orange', 'melon', 'apple'], columns=['A']))
 # Read in CSV files
 import os 
 csvFilename = 'sampleCSVFile.csv'
-csvFile = os.getcwd() + "\\introDataSciencePackages\\" + csvFilename   # creating a string of global file path 
-dfFromCSV = pd.read_csv(csvFile)
+filePath = 'e:\\Eskills-Academy-projects\\Masters-DataSciences\\TensorFlowAndKerasForDataScience\\introDataSciencePackages\\'
+# csvFile = os.getcwd() + "\\TensorFlowAndKerasForDataScience\\introDataSciencePackages\\" + csvFilename   # creating a string of global file path 
+csvFile =  filePath + csvFilename
+dfFromCSV = pd.read_csv(csvFile, sep=";")
 print(dfFromCSV.head())
 
 
 # Read in xls files
 xlsFilename = 'sampleXLSFile.xls'
-xlsFile = os.getcwd() + "\\introDataSciencePackages\\" + xlsFilename   # creating a string of global file path 
+# xlsFile = os.getcwd() + "\\TensorFlowAndKerasForDataScience\\introDataSciencePackages\\" + xlsFilename   # creating a string of global file path 
+xlsFile = filePath + xlsFilename
 xl = pd.ExcelFile(xlsFile)
 print("Sample excel file sheet name:", xl.sheet_names)
 dfFromExcel = xl.parse('Sheet1')     # Loading a sheet into a DataFrame- dfFromExcel
@@ -61,9 +62,8 @@ print(dfFromExcel.head())
 
 
 # Data cleaning using Pandas
-
-
-dataFrame2 = pd.read_csv("introDataSciencePackages/titanic.csv")
+titanicFile = filePath + "titanic.csv"
+dataFrame2 = pd.read_csv(titanicFile)
 print(dataFrame2.head())
 
 train_df = dataFrame2.drop(['PassengerId', 'Name', 'Ticket'], axis=1)   # drop specific columns
@@ -86,4 +86,5 @@ meanFare = train_df['Fare'].mean()
 train_df["Cabin"] = train_df["Cabin"].fillna("X")
 train_df["Embarked"] = train_df["Embarked"].fillna("S")
 
-train_df.to_csv("introDataSciencePackages/cleanedUpTitanic.csv")
+outputFile = filePath + "cleanedUpTitanic.csv"
+train_df.to_csv(outputFile)

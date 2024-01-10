@@ -10,7 +10,7 @@ from sklearn.svm import SVR
 from sklearn.metrics import mean_squared_error, r2_score
 
 # Load data from inbuilt dataset Boston housing prices
-data = datasets.load_boston()
+data = datasets.load_boston() # type: ignore
 X = pd.DataFrame(data=data.data, columns=data.feature_names)   # Predictor
 Y = pd.DataFrame(data=data.target, columns=['MEDV'])    # Target
 
